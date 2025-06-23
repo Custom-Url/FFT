@@ -1,69 +1,73 @@
-Programme AMITEX FFTP
-=====================
+AMITEX FFTP Program
+===================
 
-1 - Installation du programme
------------------------------
-Renseigner dans la variable FC le compilateur désiré (ifort ou gfortran)
-Préciser dans quel dossier se trouve la librairie FFT (rien à faire pour maldives)
-Vérifier au préalable que les modules nécessaires (gnu ou intel, mpi et tfel) sont chargés.
-Lancer l'installation avec la commande *./install*
+1 - Program Installation
+------------------------
+Set the desired compiler in the `FC` variable (e.g., `ifort` or `gfortran`).  
+Specify the folder where the FFT library is located (nothing to do for Maldives).  
+Ensure required modules are loaded beforehand (e.g., `gnu` or `intel`, `mpi`, and `tfel`).  
+Start the installation with the command:  
+`*./install*`
 
-2 - Exécution du programme
---------------------------
-Dans le dossier *cas_tests*, le script *script.sh* permet de lancer plusieurs cas tests.
-Pour le lancer sur le cluster Maldives, il suffit d'exécuter la commande
+2 - Running the Program
+-----------------------
+In the *cas_tests* folder, the script *script.sh* allows you to run several test cases.  
+To run it on the Maldives cluster, simply execute:
 
-    qsub script_maldives  
-	
-On pourra préciser dans ce script le nombre de noeuds désirés ou le noeud choisi.
-Un script compatible avec le cluster Poincare de la Maison de la Simulation
-est également disponible. Il faut alors lancer sur une frontale du cluster la commande
-llsubmit script_poincare
+    qsub script_maldives
 
-3 - Graphique à partir des valeurs moyennes
--------------------------------------------
-Les sorties standards (std, mstd et zstd) présentent des données moyennes
-(respectivement sur la cellule, par matériau et par zone). Ces données sont 
-écrites en colonnes et la grandeur correspondant à chaque colonne est précisée
-en commentaire au début du fichier. Ainsi, les résultats peuvent être facilement
-visualisés en utilisant gnuplot. Un exemple de script gnuplot est présenté dans 
-le dossier *post/plot*. Ce dernier peut être exécuté une fois que les tests de validation
-ont été lancés.
+You can specify in this script the desired number of nodes or the chosen node.  
+A script compatible with the Poincare cluster at the Maison de la Simulation is also available.  
+In this case, run the following command from a login node:
 
-4 - Visualisation de la déformée
+    llsubmit script_poincare
+
+3 - Plotting from Averaged Values
+---------------------------------
+The standard outputs (std, mstd, and zstd) contain average data  
+(respectively over the whole cell, per material, and per zone).  
+These are written in columns, and the quantity corresponding to each column is described  
+in comments at the beginning of the file. Thus, results can be easily visualized using gnuplot.  
+An example gnuplot script is provided in the *post/plot* directory.  
+It can be executed after running the validation tests.
+
+4 - Deformed Shape Visualization
 --------------------------------
-Dans le dossier *post/deformed_shape*, on trouve le programme *deformedShape* qui permet,
-en grandes transformations, de visualiser les champs sorties par le programme dans un 
-VTK pour lequel les voxels sont dans la configuration actuelle. Ce programme s'exécute simplement
-en lançant la commande :
+In the *post/deformed_shape* directory, the *deformedShape* program allows visualization of  
+output fields in a VTK file where voxels are mapped to their deformed (current) configuration  
+(for large deformations). This program is run using:
 
-    ./deformedShape racine_in [racine_out]  
-	
-Le premier paramètre représente la racine du (des) fichier(s) d'entrée et
-le deuxième paramètre est optionnel et permet de définir la racine du fichier de sortie.
-Par défaut, cette racine est *sortie*.
-Le programme va alors chercher le fichier *racine_in_def.vtk* ou, s'il ne le trouve pas,
-les fichiers *racine_in_defi.vtk* (*i* allant de 1 à 9).
-Ce champ représentant le gradient du déplacement permet alors de construire
-le champ de déplacement et de calculer les coordonnées
-de chaque voxel dans la configuration déformée. Le gradient du déplacement est alors
-réécrit dans  cette configuration dans le fichier *racine_out.vtk*.
-De plus, si les fichiers *racine_in_sig* ou *racine_in_pi*
-(représentant respectivement les champs de contraintes de Cauchy et de 
-Piola-Kirchhoff) sont présents, les variables correspondantes seront également présentes
-dans le fichier *racine_out.vtk*.
+    ./deformedShape input_root [output_root]
 
-5 - Pour les développeurs : validation et mise à jour des résultats
--------------------------------------------------------------------
-Dans le dossier *validation*, le script *script_tests.sh* lance certains calculs
-et vérifie que les résultats restent cohérents par rapport à ceux obtenus précédemment.
-Le script *update_results.sh* met à jour les résultats de la base en prenant ceux
-obtenus avec la nouvelle version du programme.
+The first parameter is the root of the input file(s),  
+the second parameter is optional and defines the output file root (default: *sortie*).  
+The program will search for *input_root_def.vtk* or, if not found,  
+for *input_root_defi.vtk* (*i* from 1 to 9).  
+This field (representing the displacement gradient) is used to build the displacement field  
+and compute the coordinates of each voxel in the deformed configuration.  
+The displacement gradient is then rewritten in this configuration  
+to the file *output_root.vtk*.  
+Additionally, if *input_root_sig* or *input_root_pi* files are present  
+(representing Cauchy and Piola-Kirchhoff stress fields, respectively),  
+those variables will also be included in *output_root.vtk*.
+
+5 - For Developers: Validation and Result Updates
+-------------------------------------------------
+In the *validation* folder, the script *script_tests.sh* runs selected calculations  
+and checks that the results remain consistent with previously obtained results.  
+The script *update_results.sh* updates the reference results  
+by taking those obtained with the new version of the program.
 
 IMPORTANT
 ---------
-Avant chaque push, le développeur devra lancer les tests pour vérifier que les resultats
-obtenus sont justes et que les développements n'entraînent pas une regression du code.
-Ces tests sont lancés avec un code compilé en utilisant intel15.
-Il faudra ensuite mettre à jour les résultats des tests en lançant le script *update_results*.
-Avant chaque commit, il est préférable de lancer le script clean pour éviter d'envoyer des chemins d'accès locaux.
+Before each push, the developer must run the tests to ensure results are correct  
+and that the new developments do not cause regressions in the code.  
+These tests should be run with code compiled using `intel15`.  
+You must then update the test results by running the *update_results* script.  
+Before each commit, it is recommended to run the *clean* script  
+to avoid pushing local file paths.
+
+TRANSLATION PROGRESS
+--------------------
+Currently halfway through updating  NL_base_mod.f90
+
