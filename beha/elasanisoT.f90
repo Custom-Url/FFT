@@ -168,6 +168,6 @@ SUBROUTINE elasanisoT( STRESS, STATEV, DDSDDE, SSE, SPD, SCD,&
   STRESS(4)=STRESS(4)/2._8
   STRESS(5)=STRESS(5)/2._8
   STRESS(6)=STRESS(6)/2._8
-  #t
+  
 end subroutine elasanisoT
 

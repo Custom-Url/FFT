@@ -285,34 +285,34 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
 
 
 !!------------------------------------------------------------------------------
-!>                                                          COMPATIBILITE ABAQUS
+!>                                                          ABAQUS COMPATIBILITY
   integer(kind=8)                    :: KSTEP 
 
 !!------------------------------------------------------------------------------
-!>                                     PARAMETRES DE SUIVI DES TEMPS D'EXECUTION
+!>                                       PARAMETERS FOR TRACKING EXECUTION TIMES
 
-  !! type double precision au lieu de real_mytype (=> requis par MPI_WTIME)
+!! double precision type instead of real_mytype (=> required by MPI_WTIME)
   double precision                   :: t_ini,t1,t10
 
-  !< t1          : date de repere avant les fonctions
-  !! t10         : temps cumule pris par les 10 dernieres iterations
+  !< t1          : timestep before entering function blocks
+  !! t10         : cumulative time taken by the last 10 iterations  
   
 !!------------------------------------------------------------------------------
-!>                                                                        DIVERS
+!>                                                                 MISCELLANEOUS
 
-  integer               :: i,j,k,l,m !< indice de boucle 
-  integer               :: nVarD     !< nombre de variables de diffusion 
+  integer               :: i,j,k,l,m !< loop indices 
+  integer               :: nVarD     !< number of diffusion variables
   logical               :: testNaN1,testNaN2,testdef
 
-  integer               :: TPRED_deb !< indice in local_load%t1 for T 
-  integer               :: TPRED_fin !< indice in local_load%t1 for the last param_ext
+  integer               :: TPRED_deb !< index in local_load%t1 for T 
+  integer               :: TPRED_fin !< index in local_load%t1 for the last param_ext
 
 !!==============================================================================
 !!                                                                    INIT TIMES
 !!==============================================================================
   call MPI_BARRIER(MPI_COMM_WORLD,ierror)
   t_ini = MPI_WTIME() 
-  t10 = t_ini  !< date avant debut boucle while pour cumul 10 iterations
+  t10 = t_ini  !< timestamp before start of while loop for cumulative timing
 
 !!==============================================================================
 !!                                                           AUXILIARY VARIABLES
@@ -328,7 +328,7 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
   lambda=0; mu=0
   nVarD = algo_param%nVarD
   if (algo_param%Mechanics) then
-    lambda = Matref%LambdaMu0(1)    !< materiau de référence
+    lambda = Matref%LambdaMu0(1)    !< reference material
     mu = Matref%LambdaMu0(2)
     Eimp=0
   end if
@@ -340,79 +340,79 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
   nIt_laminate_temp=0
 
        !================================================================================
-       !                                                       BOUCLE CONVERGENCE FORCEE
+       !                                                         FORCED CONVERGENCE LOOP
        !
-       !  on force la convergence si testCVFOR passe a .false. en sortie de boucle while
+       !  Forces convergence if testCVFOR becomes .false. after exiting the while loop
        ! 
        testCVFOR  = .true.
        countCVFOR = 0
        do while (testCVFOR)
 
-        VCinfo%nSub_lam_pas          = 0    !< indicateurs performances algorithme 
-        VCinfo%nIncr_lam_pas         = 0    !  laminate pour le pas de chargement
+        VCinfo%nSub_lam_pas          = 0    !< resetting laminate algorithm 
+        VCinfo%nIncr_lam_pas         = 0    !  performance indicators
         VCinfo%nIt_lam_pas           = 0
         VCinfo%nCall_lam_pas         = 0
         !----------------------------------------------------------------------
-        !                                    GESTION DU DEMI-PAS SUPPLEMENTAIRE
+        !                               MANAGEMENT OF ADDITIONAL HALF_TIME STEP
 
-        !! Le chargement load_incr=0 correspond a un chargement intermediaire
-        !! entre le chargement final impose a load_n-1
-        !! et la premiere iteration du chargement load_n 
-        !! avec un ratio defini dans loading_mod
-        KSTEP = ind_tps       ! attention, du fait du pas de temps fictif, 
-                              ! KSTEP est repete deux fois a chaque debut de chargement
-
+        !! load_incr=0 corresponds to an intermediate load between
+        !! the final load imposed at load_n-1 and 
+        !! the first iteration of load step load_n 
+        !! the ratio of this intermediate is defined in loading_mod
+        KSTEP = ind_tps       ! Note: due to the fictitous time step, 
+                              ! KSTEP is repeated twice at each start of a new load
+                     
         if(nrank==0)then
           if(load_incr == 0)then
               write(OUTPUT_UNIT,"(/,A)")"=================================================="
-              write(OUTPUT_UNIT,"(A,I8,A)")"Pas de temps fictif :",ind_tps,".5"
+              write(OUTPUT_UNIT,"(A,I8,A)")"Pseudo time step :",ind_tps,".5"
               write(Flog,"(/,A)")"=================================================="
-              write(Flog,"(A,I8,A)")"Pas de temps fictif :",ind_tps,".5"
+              write(Flog,"(A,I8,A)")"Psuedo time step :",ind_tps,".5"
           else
               write(OUTPUT_UNIT,"(/,A)")"=================================================="
-              write(OUTPUT_UNIT,"(A,I8)")"Pas de temps :",ind_tps
+              write(OUTPUT_UNIT,"(A,I8)")"Time step :",ind_tps
               write(Flog,"(/,A)")"=================================================="
-              write(Flog,"(A,I8)")"Pas de temps :",ind_tps
+              write(Flog,"(A,I8)")"Time steps :",ind_tps
           end if 
         end if
 
         !----------------------------------------------------------------------      
-        !                                EN PRESENCE D'UN CHARGEMENT LOCAL_LOAD      
+        !                                            IF A LOCAL_LOAD IS PRESENT      
         !
 
         if (algo_param%Mechanics .AND. present(locload)) local_load = locload
         if (algo_param%Diffusion .AND. present(locloadD)) local_loadD = locloadD
 
         !----------------------------------------------------------------------      
-        !                                                    ANALYSE CHARGEMENT      
+        !                                                         LOAD ANALYSIS       
         !
 
         if (algo_param%Mechanics) nb_stress_pilot = count(local_load%t1(1:algo_param%nTensDef) == 1)
         if (algo_param%Diffusion) nb_flux_pilot = count(local_loadD%t1(1:3*nVarD) == 1)  
 
         !----------------------------------------------------------------------
-        !                                 PROPOSITION D'UN CHAMP DE DEFORMATION
+        !                                           PROPOSAL FOR A STRAIN FIELD
         !
-        ! avec CV forcee : 
-        !    1ere initialisation identique au cas sans CV forcee
-        !    PUIS
-        !    si algo_param%init_cvfor=='default' : 
-        !       initialisation identique au cas sans CV forcee.
-        !    si algo_param%init_cvfor=='last' ou 'best': 
-        !       on recupere le champ DEF choisi en fin de CV forcee precedente 
-        !    'default' semble donner les meilleurs resultats
+        ! with forced convergence:
+        !    First initialisation same as without forced convergence
+        !    THEN
+        !    if algo_param%init_cvfor=='default' : 
+        !       initialisation same as without forced convergence.
+        !    if algo_param%init_cvfor=='last' or 'best': 
+        !       recover the DEF field chosen at the end of the previous forced convergence
+        !    'default' seems to give the best results
         !
-        ! sans CV forcee :  le test ci-dessous est toujours vrai
+        ! wihtout forced convergence: the test below is always true
         !
         if (algo_param%init_cvfor=='default' .OR. countCVFOR == 0) then
         if (algo_param%Mechanics) then
-            if (algo_param%init_def /= 'None') then !-- peut etre mis a 'None' dans un fonction user pour proposer une autre initialisation 
+            if (algo_param%init_def /= 'None') then !-- may be set to 'None' in a user function to propose a different initialisation 
             if (algo_param%HPP_nsym) then
-                ! prise en compte du gradient complet du deplacement dans un 
-                ! calcul HPP : initialisation de Def_nsym
+                ! consider full displacement gradient in  
+                ! HPP calculation: initialise Def_nsym
                 call initDef(local_load%t1(1:2*algo_param%nTensDef),&
                          nb_stress_pilot,local_load%t_load,load_incr,load_n,Matref%C0,Def0,Def,&
-                         Def_nsym0,Def_nsym); !load_incr,load_n  pour tester cas particulier 0 et 1
+                         Def_nsym0,Def_nsym); !load_incr,load_n  for testing special cases 0 and 1
             else 
                 call initDef(local_load%t1(1:2*algo_param%nTensDef),&
                          nb_stress_pilot,local_load%t_load,load_incr,load_n,Matref%C0,Def0,Def);
@@ -430,7 +430,7 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
         end if
 
         !----------------------------------------------------------------------
-        !                              INITIALISATION DES CRITERES ET COMPTEURS
+        !                               INITIALISATION OF CRITERIA AND COUNTERS
 
         if (algo_param%Diffusion) then
             crit_b%eqD=0_mytype
@@ -445,9 +445,9 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
             crit_b%SigMoy=0_mytype
         end if
 
-        nIt=-1  ! nombre d'iterations pour le pas de chargement courant
-                ! passe a 0 a l'entree de la boucle while
-                ! puis l'algo force au moins une iteration 
+        nIt=-1  ! number of iterations for the current load step
+                ! becomes 0 when entering the while loop
+                ! then the algorithm forces at least one iteration
         iact3=0
         lact3=.false.
         acv_test = .true.
@@ -455,8 +455,8 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
 
         !----------------------------------------------------------------------
         !                                                          DefF=FFT(Def)
-        !              format DefF: (pinceaux-Z, taille globale (nx/2+1)*ny*nz)
-        !                                             on normalise DefF par ntot
+        !                  format DefF: (pinceaux-Z, global size (nx/2+1)*ny*nz)
+        !                                             is normalised DefF by ntot
 
         if (algo_param%Mechanics) then
            call field_fft(Def,DefF,algo_param%nTensDef,1)
@@ -468,24 +468,24 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
            GradQDF=GradQDF / real(grid%ntot,mytype)
         end if
 
-       !pour tester calcul critere en deformation sur un champ simple
+       ! To test eva;uation of deformation criterion on a simple field
        !  call eval_criteres(SigF,DefF,FREQ,local_load%t1(1:2*algo_param%nTensDef),&
        !        load(load_n)%DirStress_flag, load(load_n)%DirStress2,& 
        !        crit_b%eq,crit_b%SigMoy,crit_b%DefMoy,crit_b%Cptb,grid%ntot)
 
 
         !----------------------------------------------------------------------
-        !                           POUR LE 1er PAS DE CHARGEMENT (load_incr=0)
-        !         PROPOSITION D'UN CHAMP DE DEFORMATION (SUITE): AJOUT gragradU
-        !                                                        AJOUT Def_star
+        !                                   FOR THE 1st LOAD STEP (load_incr=0)
+        !                PROPOSAL FOR A DEFORMATION FIELD (SUITE): ADD gragradU
+        !                                                          ADD Def_star
         !
-        !                      on doit ajouter gragradU APRES avoir evalue DefF
+        !                           gradgradU must be aff AFTER evaluating DefF
         !
         if (algo_param%init_cvfor=='default' .OR. countCVFOR == 0) then
         if (algo_param%Mechanics) then
-            ! Cas gradgradU impose
+                ! Case with imposed gradgradU
             ! Def = def + (gradgradU) (_sym si HPP)
-            if (n_gradgradU==27 .AND. load_incr==0) then !test pas tres joli <=> test gradgradU impose
+            if (n_gradgradU==27 .AND. load_incr==0) then ! not very elegant test <=> test if gradgradU imposed
                call add_gradgradU(Def,algo_param%nTensDef,&
                           local_load%t1(TPRED_fin+1:TPRED_fin+27),load(load_n)%gevolution,&
                            grid%dx,grid%dy,grid%dz,grid%nx,grid%ny,grid%nz)
@@ -497,12 +497,12 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
          end if
 
         !----------------------------------------------------------------------
-        !                                                          COMPORTEMENT
+        !                                                             BEHAVIOUR
 
-        if (algo_param%Mechanics) then !----- MECANIQUE
+        if (algo_param%Mechanics) then !----- MECHANICS
              if (algo_param%HPP_nsym)  then
-                ! prise en compte du gradient complet du deplacement dans un 
-                ! calcul HPP 
+                ! take into account full displacement gradient in 
+                ! HPP calculation
                 call behavior(SIG,SIG0,DEF,DEF0,local_load%t0(TPRED_deb:TPRED_fin),&
                            local_load%dt(TPRED_deb:TPRED_fin),local_load%t_load,KSTEP,&
                            nSub_laminate_temp,nIncr_laminate_temp,nIt_laminate_temp,VCinfo%nCall_lam_pas,&
@@ -516,8 +516,8 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
            if(.not. algo_param%HPP) then
               call SigToPK1(Sig,Def,PK1)
            end if
-           if (algo_param%Nloc .and. .false. ) then !---- Mecanique non locale resolution implicite (A REVOIR)
-              !TODO revoir la possibilite d'introduire de l'implicite
+           if (algo_param%Nloc .and. .false. ) then !---- None-local mechanics, implicit resoltuion (TO BE REVIEWED)
+              !TODO: review the possibility of introducing implicit treatment
               call Nloc_call(load_n,load_incr,ind_tps,"after", algo_param%nloc_implicit)
            end if
         end if
@@ -527,10 +527,9 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
                           local_loadD%dt(6*algo_param%nVarD+1:),local_loadD%t_load,KSTEP)
         end if
 
-        ! Incrémentation des compteurs après appel au comportement
-        !       a ce moment nCall_laminate contient le nombre de voxels composites "laminate"
-        !       pour ce pas de chargement (en prévision de cas ou ce nombre changerait 
-        !       d'un pas de chargement à l'autre)
+        ! Increment counters after behaviour call
+        !       at thjis point, nCall_laminate contains number of composite voxels "laminate"
+        !       for this load step (in case this number changes between steps) 
         VCinfo%nSub_lam_pas   = VCinfo%nSub_lam_pas  + nSub_laminate_temp
         VCinfo%nIncr_lam_pas  = VCinfo%nIncr_lam_pas + nIncr_laminate_temp
         VCinfo%nIt_lam_pas    = VCinfo%nIt_lam_pas   + nIt_laminate_temp
@@ -684,20 +683,20 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
            end if
            if(testNaN1) then
               if(nrank==0) then
-                 write (Flog,"(A,I8)")"-------- ERREUR : CRITERE D'EQUILIBRE NaN----- iteration ",nIT
+                 write (Flog,"(A,I8)")"-------- ERROR : EQUILIBRIUM CRITERION NaN----- iteration ",nIT
                  if (algo_param%Mechanics) write (Flog,"(A,E15.8)") "crit_eq = ", crit_b%eq
                  if (algo_param%Diffusion) write (Flog,"(A,(E15.8))") "crit_eqD = ", crit_b%eqD
               end if
-              call amitex_abort("Critere d'equilibre NaN",2,0)
+              call amitex_abort("Equilibrium criterion is  NaN",2,0)
            end if
            if(testNaN2) then
               if(nrank==0) then
                  write (Flog,"(A,I8)")&
-                 "-------- ERREUR : CRITERE SUR LA CONTRAINTE (ou LE FLUX) MOYENNE NaN----- iteration ",nIT
+                 "-------- ERROR : AVARAGE STRESS (or FLUX) CRITERION NaN----- iteration ",nIT
                  if (algo_param%Mechanics) write (Flog,"(A,E15.8)") "critSigMoy = ", crit_b%SigMoy
                  if (algo_param%Diffusion) write (Flog,"(A,(E15.8))") "critFluxDmoy) = ", crit_b%FluxDmoy
               end if
-              call amitex_abort("Critere sur la contrainte (ou le flux) moyenne NaN",2,0)
+              call amitex_abort("Average stress (or flux) criterion is NaN",2,0)
            end if
 
 !print *, "AV STOCKAGE CV FOR",nrank
@@ -1395,29 +1394,29 @@ subroutine log_after_unpas(load_incr,ind_tps, nIt,&
   if (nrank==0) then
     if (present(msg)) write(OUTPUT_UNIT,"(A)") msg
     write(OUTPUT_UNIT,"(/,A)")     "------------------------------------------ ("//trim(simu_name)//")"
-    write(OUTPUT_UNIT,"(A,I8)")"Nombre d'iterations     :",nIt
+    write(OUTPUT_UNIT,"(A,I8)")"Number of iterations    :",nIt
     write(OUTPUT_UNIT,"(A,/,/)")"=================================================="
-    !! Dans le log
+    !! In the log
     write(Flog,"(/,A)")"--------------------------------------------------"
     if(load_incr==0) then
-       write(Flog,"(A,I8,A)")"Fin du pas de chargement fictif :",ind_tps,".5"
+            write(Flog,"(A,I8,A)")"End of ficticious loading step :",ind_tps,".5"
     else
-       write(Flog,"(A,I8)")"Fin du pas de chargement :",ind_tps
+            write(Flog,"(A,I8)")"End of loading step :",ind_tps
     end if
-    write(Flog,"(A,I8)")"Nombre d'iterations     :",nIt 
+    write(Flog,"(A,I8)")"Number of iterations    :",nIt 
     call write_crit_log(Flog)
 
     !! Info umatLaminate
     if (testLaminate) then
        write(Flog,"(A)") "UmatLaminate : "
-       write(Flog,"(A,F12.4)")"          - Nombre d'iterations moyen :",&
+       write(Flog,"(A,F12.4)")"          - Average number of iterations :",&
                    real(VCinfo%nIt_lam_pas)/real(VCinfo%nCall_lam_pas)
        !! Info éventuels pilotages effectués pour umatLaminate
        if (VCinfo%nSub_lam_pas > 0) then
-          write(Flog,"(A,I12,A,I12,A,F12.4,A)")"          - Nombre de recours à la subdivision du & 
-            & pas de temps/Nombre d'appels  :",VCinfo%nSub_lam_pas,&
+          write(Flog,"(A,I12,A,I12,A,F12.4,A)")"          - Number of time step subdivisions & 
+            & /Number of calls  :",VCinfo%nSub_lam_pas,&
               " / ",VCinfo%nCall_lam_pas,"  (",100*real(VCinfo%nSub_lam_pas)/real(VCinfo%nCall_lam_pas),"%)"
-          write(Flog,"(A,F12.4)")"          - Nombre moyen de sous pas de temps utilisé pour les &
+          write(Flog,"(A,F12.4)")"          - Average number of sub-time steps used for &
             & subdivisons      :", real(VCinfo%nIncr_lam_pas)/real(VCinfo%nSub_lam_pas)
        end if
     end if

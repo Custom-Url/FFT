@@ -96,50 +96,50 @@ subroutine init_user_variables()
   integer :: alloc_stat
 
   !!------------------------------------------------------------------------------
-  !>                                                     INITIALISATION DES CHAMPS
-  !>                                                 POUR LE PHASE-FIELD YANG CHEN
+  !>                                                      INITIALISATION OF FIELDS
+  !>                                                 FOR THE YANG CHEN PHASE_FIELD
 
   ! strain energy history: in real space
   allocate(HH(xsize(1)*xsize(2)*xsize(3),1),stat=alloc_stat)
-  if(alloc_stat /=0) call amitex_abort("espace memoire disponible insuffisant (init_user_variables 1)",2)
+  if(alloc_stat /=0) call amitex_abort("insufficient memory available (init_user_variables 1)",2)
   HH=0.
 
   ! damage variable
   allocate(damageVar(xsize(1)*xsize(2)*xsize(3),1),stat=alloc_stat)
-  if(alloc_stat /=0) call amitex_abort("espace memoire disponible insuffisant (init_user_variables 2)",2)
+  if(alloc_stat /=0) call amitex_abort("insufficient memory available (init_user_variables 2)",2)
 
   ! polarization term for damage problem
   allocate(tau(xsize(1)*xsize(2)*xsize(3),1),stat=alloc_stat)
-  if(alloc_stat /=0) call amitex_abort("espace memoire disponible insuffisant (init_user_variables 3)",2)
+  if(alloc_stat /=0) call amitex_abort("insufficient memory available (init_user_variables 3)",2)
   tau=0.
   allocate(tau0(xsize(1)*xsize(2)*xsize(3),1),stat=alloc_stat)
-  if(alloc_stat /=0) call amitex_abort("espace memoire disponible insuffisant (init_user_variables 3)",2)
+  if(alloc_stat /=0) call amitex_abort("insufficient memory available (init_user_variables 3)",2)
   tau0=0.
 
   ! in Fourier space
   allocate(tauF(fft_start(1):fft_end(1),fft_start(2):fft_end(2),fft_start(3):fft_end(3),1),&
            stat=alloc_stat)   
-  if(alloc_stat /=0) call amitex_abort("espace memoire disponible insuffisant (init_user_variables 4)",2)
+  if(alloc_stat /=0) call amitex_abort("insufficient memory available (init_user_variables 4)",2)
   tauF=0.
  
   ! process variables for computing the polarization term tau
   allocate(AA(xsize(1)*xsize(2)*xsize(3),1),stat=alloc_stat)
-  if(alloc_stat /=0) call amitex_abort("espace memoire disponible insuffisant (init_user_variables 5)",2)
+  if(alloc_stat /=0) call amitex_abort("insufficient memory available (init_user_variables 5)",2)
   AA=0.
   allocate(BB(xsize(1)*xsize(2)*xsize(3),1),stat=alloc_stat)
-  if(alloc_stat /=0) call amitex_abort("espace memoire disponible insuffisant (init_user_variables 5)",2)
+  if(alloc_stat /=0) call amitex_abort("insufficient memory available (init_user_variables 5)",2)
   BB=0.
   
   ! frequencies for Laplacian operator
   allocate(FreqLaplacian(fft_start(1):fft_end(1),fft_start(2):fft_end(2),fft_start(3):fft_end(3)),stat=alloc_stat)
-  if(alloc_stat /=0) call amitex_abort("espace memoire disponible insuffisant (init_user_variables 6)",2)
+  if(alloc_stat /=0) call amitex_abort("insufficient memory available (init_user_variables 6)",2)
   FreqLaplacian=0.
  
   ! storage variables for convergence acceleration of phase-field solution
   if (user_param%p_string(1)=="true") then
      allocate(ACT3_Rdamage(xsize(1)*xsize(2)*xsize(3),1,4),stat=alloc_stat)
      allocate(ACT3_Udamage(xsize(1)*xsize(2)*xsize(3),1,4),stat=alloc_stat)
-     if(alloc_stat /=0) call amitex_abort("espace memoire disponible insuffisant (init_user_variables 8)",2)
+     if(alloc_stat /=0) call amitex_abort("insufficient memory available (init_user_variables 8)",2)
      ACT3_Rdamage=0.
      ACT3_Udamage=0.
   end if
@@ -176,7 +176,7 @@ end subroutine init_user_variables
 subroutine initFreqLaplacian_YC()
 !> initialize the frequency square that corresponds to laplaian operator
 !   - inspired from the subroutine "field_second_order_partial_centeredF"
-! schema de derivation : DIFFERENCE FINIE CENTREE "approximation 27 voxels"
+! derivation scheme: CENTERED FINITE DIFFERENCE "approximation 27 voxels"
   implicit none
   integer                     :: i,j,k
 #ifdef DOUBLE_PREC
@@ -240,15 +240,15 @@ subroutine resolPF_visc(dt,nitPF,critPF,timePF)
   integer                             :: niterMaxPF
   real(mytype),intent(out)            :: critPF
   real(mytype),intent(out)            :: timePF
-  integer,intent(out)                 :: nItPF  ! nombre d'iterations pour le pas de chargement courant
+  integer,intent(out)                 :: nItPF  ! number of iterations for the current loadstep (output)
   integer                             :: ierr
   logical                             :: testCV_PF   !< test of convergence for phase-field
   real(mytype)                        :: AA0,AAmin,AAmax
-  integer                             :: iact3           !< compteur pour ACV
-  logical                             :: lact3           !< indice d'activation de l'ACV
+  integer                             :: iact3           !< counter for ACV
+  logical                             :: lact3           !< activation flag for ACV
   logical                             :: acv_test,  acc_CV_PF
-                                                                  !< sortie act3 : 
-                                                                  !< permet de ne pas stocker un champ non accelere
+                                                                  !< flags related to ACV output
+                                                                  !< prevents storing non-acclerated fields
   real(mytype)                        :: tol_critPF, sumTau,sumDiffTau
   real(mytype)                        :: t1
  
@@ -391,7 +391,7 @@ subroutine getHistoryTerm_visc(dt)
   implicit none
   real(mytype),intent(in) :: dt
   real(mytype)            :: lc, visc, gc, visco
-  integer(INT64)          :: i,j,k     !< indice de boucle 
+  integer(INT64)          :: i,j,k     !< loop index 
   integer(INT64)          :: m,l       !index of voxel, minimum number of zone
   !                                                                   Loop of every voxel
   ! -------------------------------------------------------------------------------------

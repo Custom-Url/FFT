@@ -4,10 +4,13 @@
 
 # ADJUST ENVIRONMENT VARIABLES if necessary ('module load xxx' on clusters)
 # for example:
-source /u/q/dg765/amitex_fftp/env_amitex.sh
+source /mnt/data/dg765/FFT
+
+export LD_LIBRARY_PATH=/mnt/data/dg765/FFT/amitex_fftp/libAmitex/lib:$LD_LIBRARY_PATH
+
 
 # EXECUTABLE amitex_fftp
-AMITEX="/u/q/dg765/amitex_fftp/libAmitex/src/user_Miehe2/amitex_fftp"
+AMITEX="/mnt/data/dg765/FFT/amitex_fftp/libAmitex/src/user_Miehe2/amitex_fftp"
 
 MPIRUNalias='mpirun -np 18'
 
