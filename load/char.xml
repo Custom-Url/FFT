@@ -4,7 +4,7 @@
 <!-- OUPUT QUANTITIES -->
 <Output>
     <vtk_StressStrain Strain="1" Stress="1"/>
-    <vtk_IntVarList numM="1">  </vtk_IntVarList>
+    <vtk_IntVarList numM="1"> Damage  </vtk_IntVarList>
     <vtk_IntVarList numM="2">  </vtk_IntVarList>
 </Output>
 
@@ -16,8 +16,8 @@
 
 <!-- SUCCESSIVE LOADINGS AND OUTPUT TIMES -->
 <Loading Tag="1">
-    <Time_Discretization Discretization="Linear" Nincr="10" Tfinal="10" />
-    <Output_vtkList> 1 </Output_vtkList> 
+    <Time_Discretization Discretization="Linear" Nincr="10" Tfinal="1.0" />
+    <Output_vtkList> 1 10 </Output_vtkList> 
     <!--mechanical load-->
     <xx Driving="Stress" Evolution="Constant"/>
     <yy Driving="Stress" Evolution="Constant"/>
@@ -30,10 +30,10 @@
 </Loading>
 
 <Loading Tag="2">
-    <Time_Discretization Discretization="Linear" Nincr="50" Tfinal="111" />
-    <Output_vtkList> 1 </Output_vtkList> 
+    <Time_Discretization Discretization="Linear" Nincr="200" Tfinal="200" />
+    <Output_vtkList> 1 10 50 100 200</Output_vtkList> 
     <!--mechanical load-->
-    <xx Driving="Strain" Evolution="Linear" Value="0.01"/>
+    <xx Driving="Strain" Evolution="Linear" Value="0.5"/>
     <yy Driving="Stress" Evolution="Constant"/>
     <zz Driving="Stress" Evolution="Constant"/>
     <xy Driving="Stress" Evolution="Constant"/>
