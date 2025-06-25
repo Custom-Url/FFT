@@ -852,13 +852,13 @@ contains
 
     N = 0._mytype
 
-    !!act3 : reduction a 2 dimensions
-    call amitex_abort("act3 : reduction a 2 dimensions",-1,0)
+    !!act3 : reduction to 2 dimensions
+    call amitex_abort("act3 : reduction to 2 dimensions",-1,0)
 
     GOTO 1010
 
 2100 CONTINUE
-    !!le systeme est singulier on essaye avec un vecteur de moins
+    !!the system is singular, we try with one fewer vector
     IF (ABS(A1) .LT. xpetit ) GOTO 1000
 
     L  = J1/A1
@@ -866,13 +866,13 @@ contains
     M  = 0._mytype
     N  = 0._mytype
 
-    !!act3 : reduction a 1 dimensions
-    call amitex_abort("act3 : reduction a 1 dimension",-1,0)
+    !!act3 : reduction to 1 dimension
+    call amitex_abort("act3 : reduction to 1 dimension",-1,0)
     GOTO 1010
 
 1000 CONTINUE
-    !!act3 : pas d accélération
-    call amitex_abort("act3 : pas d'acceleration",-1,0)
+    !!act3 : no acceleration
+    call amitex_abort("act3 : no acceleration",-1,0)
     L = 0._mytype
     M = 0._mytype
     N = 0._mytype
@@ -1300,8 +1300,8 @@ contains
 
     N = 0._mytype
 
-    !!act3 : reduction a 2 dimensions
-    call amitex_abort("act3 : reduction a 2 dimensions",-1,0)
+    !!act3 : reduction to 2 dimensions
+    call amitex_abort("act3 : reduction to 2 dimensions",-1,0)
 
     GOTO 1010
 
@@ -1314,13 +1314,13 @@ contains
     M  = 0._mytype
     N  = 0._mytype
 
-    !!act3 : reduction a 1 dimensions
-    call amitex_abort("act3 : reduction a 1 dimension",-1,0)
+    !!act3 : reduction to 1 dimension
+    call amitex_abort("act3 : reduction to 1 dimension",-1,0)
     GOTO 1010
 
 1000 CONTINUE
-    !!act3 : pas d accélération
-    call amitex_abort("act3 : pas d'acceleration",-1,0)
+    !!act3 : no acceleration
+    call amitex_abort("act3 : no 'acceleration",-1,0)
     L = 0._mytype
     M = 0._mytype
     N = 0._mytype

@@ -784,20 +784,20 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
               end if
               if(testNaN1) then
                  if(nrank==0) then
-                    write (Flog,"(A)")"-------- ERREUR : CRITERE DE COMPATIBILITE NaN-----"
+                    write (Flog,"(A)")"-------- ERROR: COMPATIBLILTY CRTIERION IS  NaN-----"
                     if (algo_param%Mechanics) write (Flog,"(A,E15.8)") "critCptb = ", crit_b%eq
                     if (algo_param%Diffusion)write (Flog,"(A,(E15.8))") "critCptbD = ", crit_b%eqD
                  end if
-                 call amitex_abort("Critere de compatibilite NaN",2,0)
+                 call amitex_abort("Compatibilty criterion is NaN",2,0)
               end if
               if(testNaN2) then
                  if(nrank==0) then
                     write (Flog,"(A)")&
-                         "-------- ERREUR : CRITERE SUR LA DEFORMATION (ou GRADQD) MOYENNE NaN-----"
+                         "-------- ERROR: AVERAGE STRAIN (or GRADQD) IS NaN-----"
                     if (algo_param%Mechanics) write (Flog,"(A,E15.8)") "critDefMoy = ", crit_b%DefMoy
                     if (algo_param%Diffusion) write (Flog,"(A,(E15.8))") "critFluxDmoy) = ", crit_b%GradQDmoy
                  end if
-                 call amitex_abort("Critere sur la deformation (ou GRADQD) moyenne NaN",2,0)
+                 call amitex_abort("Average strain (or GRADQD) criterion is NaN",2,0)
               end if
 
 !print *, "AV SORTIE SUR CRITERES EN DEF",nrank
@@ -833,38 +833,38 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
               end if
            end if
            
-!print *, "AV EVAL SORTIE CONDITIONNELLE ERREUR",nrank
+!print *, "BEFORE EVALUATING CONDITIONAL EXIT ERROR",nrank
            !----------------------------------------------------------------------
-           !                                          SORTIE CONDITIONNELLE ERREUR 
-           !                        nombre d'iterations max atteint sans CV forcee
+           !                                             CONDITIONAL EXIT ON ERROR 
+           !                maximum number of iterations reached without forced CV
 
            if(nIt .gt. algo_param%nIterMax .AND. (.not. algo_param%CVfor)) then
-              !! Si on fait trop d'iterations on arrete le calcul
-              call amitex_abort("Nombre d iterations maximal atteint, le calcul est arrete.",1,0)
+                   !! If too many iterations are done, stop the computation
+              call amitex_abort("Maximum number of iterations reached, computation stopped.",1,0)
               t1 = MPI_Wtime()
 
-              !! Avant de quitter le programme :
-              !! on sort les images vtk des champs de la derniere iteration effectuee
+              !! Before exiting the progra :
+              !! output the VTK images of the fields from the last completed iteration
               if (.not. algo_param%CVfor  .or. (algo_param%CVfor .and. (nit .eq. algo_param%Nit_cvfor))) then
-                 if(nrank == 0) write(Flog,"(A)")"Ecriture des VTK du dernier pas de temps converge."
+                 if(nrank == 0) write(Flog,"(A)")"Writing VTK of the last converged time stepe."
                  call writeVTK(ind_tps)
               end if
 
               if (nrank == 0) then
-                 write(OUTPUT_UNIT,"(A)") "Nombre d iterations maximal atteint, le calcul est arrete."
+                 write(OUTPUT_UNIT,"(A)") "Maximum number of iterations reached, computation stopped."
                  write(OUTPUT_UNIT,"(/,A,/)")"-----------------------------"
-                 write (Flog,"(A)") "Nombre d iterations maximal atteint, le calcul est arrete."
+                 write (Flog,"(A)") "Maximum number of iterations reached, computation stopped."
                  write (Flog,"(A,/)")"-----------------------------"
               end if
               exit
            end if
            
-!print *, "AV EVAL SORTIE CONDITIONNELLE CONVERGENCE FORCEE",nrank
+!print *, "BEFORE EVALUATING CONDITIONAL EXIT FORCED CONVERGENCE",nrank
            !----------------------------------------------------------------------
-           !                              SORTIE CONDITIONNELLE CONVERGENCE FORCEE 
-           !                                           1ERE ITERATION DE CV FORCEE
-           !                                              critere nItermax atteint
-           !                      RQ: pas de convergence forcee sur le premier pas
+           !                                CONDITIONAL EXIT ON FORCED CONVERGENCE 
+           !                                            1ST ITERATION OF FORCED CV
+           !                                            criterion n_terMax reached
+           !                         NOTE: no forced convergence on the first step
            ! 
            if(algo_param%CVfor .AND. (load_incr .ne. 0) .AND. &
               (countCVfor == 0) .AND. (nIt .gt. algo_param%nIterMax)) then              
@@ -873,14 +873,14 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
            end if
 
            !----------------------------------------------------------------------
-           !                              SORTIE CONDITIONNELLE CONVERGENCE FORCEE
-           !                                        AUTRES ITERATIONS DE CV FORCEE
-           !                                             critere Nit_cvfor atteint
-           !                     RQ : pas de convergence forcee sur le premier pas
+           !                                CONDITIONAL EXIT ON FORCED CONVERGENCE
+           !                                         OTHER ITERATIONS OF FORCED CV
+           !                                           criterion nit_cvfor reached
+           !                         NOTE: no forced convergence on the first step
            !  
            if (algo_param%CVfor .and. (nit .eq. algo_param%Nit_cvfor) .and. (load_incr .ne. 0)) then
               if (countCVFOR .eq. (algo_param%Ncvfor-1) ) then
-                if(nrank == 0) write(Flog,"(A)")"Ecriture VTK du dernier pas de convergence forcée."
+                if(nrank == 0) write(Flog,"(A)")"Writing vtk of the last forced convergence step."
                 call writeVTK(ind_tps)
               end if
               testCVFOR=.true.
@@ -1231,19 +1231,19 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
            VCinfo%nIt_lam_pas   = VCinfo%nIt_lam_pas   + nIt_laminate_temp
 
            !----------------------------------------------------------------------
-           !                          AFFICHAGE fichier.log (MODULO 10 ITERATIONS)
+           !                          DISPLAY to fichier.log (EVERY 10 ITERATIONS)
 
            
-           !nIt=nIt+1;      ! incrementation du nombre d'iterations 
-             ! A DECOMMENTER pour une sortie des criteres a chaque iteration dans le .log 
+           !nIt=nIt+1;      ! incrementat  number of iterations 
+             ! UNCOMMENT to output criteria at each iteration to .log 
              !  if (nrank==0) call write_crit_log(Flog)
              !  if (nrank==0) write (Flog,"(/,A,/)")"-----------------------------"
-             ! A DECOMMENTER pour une sortie nIt,crit_b%eq a chaque iteration dans le .log 
+             ! UNCOMMENT to output nIt, crit_b%eq at each iteration to .log 
              ! if(nrank==0)then
              !     write (Flog,"(I8,E15.8)") nIt,crit_b%eq
              ! end if
 
-!-- sortie energie de deformation
+!-- deformation energy output
 !block
 !   real(mytype) :: energy_loc,energy
   
@@ -1260,32 +1260,32 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
 !end block
 
 
-           if((nIt .gt. 0)  .and. modulo(nIt,10)==0) then  ! affichage toutes les 10 iterations
-              call MPI_BARRIER(MPI_COMM_WORLD,ierror) !necessite?
+           if((nIt .gt. 0)  .and. modulo(nIt,10)==0) then  ! display every  10 iterations
+              call MPI_BARRIER(MPI_COMM_WORLD,ierror) !needed?
               t1 = MPI_WTIME()
 
               if(nrank==0)then
                  write (Flog,"(/,A,/)")"-----------------------------"
                  if(load_incr==0) then
-                    write (Flog,"(A,I8,A)")"pas de chargement fictif ",ind_tps,".5"
+                    write (Flog,"(A,I8,A)")"ficticious loading step ",ind_tps,".5"
                  else
-                    write (Flog,"(A,I8)")"pas de chargement ",ind_tps
+                    write (Flog,"(A,I8)")"loading step ",ind_tps
                  end if
                  write (Flog,"(I8,A)") nIt, " iterations"
                  !sortie fichier log
                  call write_crit_log(Flog)
                  !sortie ecran
                  call write_crit_log(OUTPUT_UNIT)
-                 write (Flog,"(A,E15.8)") "Temps total apres initialisation :",t1-times_b%startalgo
-                 write (Flog,"(A,E15.8)") "Temps des 10 dernieres iterations :",t1-t10
+                 write (Flog,"(A,E15.8)") "Total time after initialisation :",t1-times_b%startalgo
+                 write (Flog,"(A,E15.8)") "Time for the last 10 iterations :",t1-t10
                  write (Flog, "(A,/,A)") "Temps :",&
                    "FFT_contrainte IFFT_deformation     umat        apply_green   eval_criteres  ecriture"
                  !! A afficher en sortie
                  write(OUTPUT_UNIT,"(/,A,/)")"-----------------------------"
                  if(load_incr==0) then
-                    write(OUTPUT_UNIT,"(A,I8,A)")"pas de chargement fictif",ind_tps,".5"
+                    write(OUTPUT_UNIT,"(A,I8,A)")"ficticous loading step",ind_tps,".5"
                  else
-                    write(OUTPUT_UNIT,"(A,I8)")"pas de chargement ",ind_tps
+                    write(OUTPUT_UNIT,"(A,I8)")"loading step ",ind_tps
                  end if
                  write(OUTPUT_UNIT,"(I8,A)") nIt, " iterations"
                  write (Flog,"(6E15.8)") times_f%fft, times_f%ifft, times_m%behavior, times_g%apply, times_g%crit, times_io%wvtk
@@ -1294,21 +1294,21 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
            end if
 
         end do
-        !                                                                FIN BOUCLE WHILE
+        !                                                                  END WHILE LOOP
         !================================================================================
-        !                                                              CONVERGENCE FORCEE 
+        !                                                              FORCED CONVERGENCE 
         !                                              
         !
-        !------------ACTUALISATION FORCEE DES VARIABLES INTERNES
+        !------------FORCED UPDATE OF INTERNAL VARIABLES        
         !
-!print *,"AP WHILE - AV CVFOR"
+!print *,"AP WHILE - BEFORE CVFOR"
         if (testCVFOR) then
 
-          !--On recalcule le comportement pour evaluer les variables internes 
-          !  avec la meilleure solution en def.
+          !--Recompute the behaviour to evaluate internal variables 
+          !  using the best solution in strain.
           if (algo_param%HPP_nsym)  then
-             ! prise en compte du gradient complet du deplacement dans un 
-             ! calcul HPP 
+             ! take into account the full displacement gradient in 
+             ! HPP calculation
              call behavior(SIG,SIG0,CVFORsauv%Def,DEF0,local_load%t0(TPRED_deb:TPRED_fin),&
                         local_load%dt(TPRED_deb:TPRED_fin),local_load%t_load,KSTEP,&
                         nSub_laminate_temp,nIncr_laminate_temp,nIt_laminate_temp,&
@@ -1319,19 +1319,19 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
                         nSub_laminate_temp,nIncr_laminate_temp,nIt_laminate_temp)
           end if
 
-          !--On modifie les variables internes et la contrainte en debut de pas de temps
+          !--Update internal variables and stress at beginning of time step
           do i=1,size(MattotP)
              MattotP(i)%VarInt0(1:MattotP(i)%nVarInt,:)=MattotP(i)%VarInt(1:MattotP(i)%nVarInt,:)
           end do  
           Sig0=Sig
 
-         !-- Choix de l'initialisation de la prochaine iteration de CV forcee
+         !-- Initialisation choice for the next forced CV iteration CV forcee
          !   pour le cas init_cvfor='best'
          if (algo_param%init_cvfor=='best') then
              Def = CVFORsauv%Def
          end if
 
-         !-- Actualisation compteur
+         !-- Update counter
          if (nrank==0) write (Flog,"(A,I4,A,E15.8)") &
                        "countCVFOR= ", countCVFOR, " / crit eq = ", CVFORsauv%critmin
          if (nrank==0) write (OUTPUT_UNIT,"(A,I4,A,E15.8)") &
@@ -1341,26 +1341,26 @@ subroutine unpas_NL_base(load_n,load_incr,ind_tps,nIt,locload,locloadD)
         end if
 
         !
-        !------------TEST DE SORTIE DE PROGRAMME SUR LA CONVERGENCE FORCEE
+        !------------EXIT PROGRAM TEST ON FORCED CONVRGENCE 
         !
         if (countCVFOR .eq. algo_param%Ncvfor) then 
            if (nrank == 0) then
-              write (OUTPUT_UNIT,"(A,I8,A)") "Plus de ",algo_param%Ncvfor," convergences forcees, le calcul est arrete."
+              write (OUTPUT_UNIT,"(A,I8,A)") "More than ",algo_param%Ncvfor," forced convergences, computation stopped."
               write (OUTPUT_UNIT,"(/,A,/)")"-----------------------------"
-              write (Flog,"(A,I8,A)") "Plus de ",algo_param%Ncvfor," convergences forcees, le calcul est arrete."
+              write (Flog,"(A,I8,A)") "More than ",algo_param%Ncvfor," forced convergences, computation stopped."
               write (Flog,"(/,A,/)")"-----------------------------"
            end if
-           call amitex_abort("Nombre maximal de convergences forcees atteint",2,0)
+           call amitex_abort("Maximim number of forced convergences reached",2,0)
         end if
 
         end do
-        !                                                   FIN BOUCLE CONVERGENCE FORCEE
+        !                                                     END FORCED CONVERGENCE LOOP
         !================================================================================
 
   call MPI_BARRIER(MPI_COMM_WORLD,ierror)
   times_b%unpas = times_b%unpas + MPI_WTIME()- t_ini
 
-!print *,"FIN UNPAS_NL_BASE"
+  !print *,"END UNPAS_NL_BASE"
 end subroutine unpas_NL_base
 
 
@@ -1478,7 +1478,7 @@ subroutine log_final_times(nitTot)
      write(Flog,"(A,E15.8)") "Cumulated time in unpas_NL_base   : ", times_b%unpas
      write(Flog,"(A,E15.8)") "Total time in resolution_NL_base  : ", t1-times_b%startalgo
 
-     write(Flog,"(A,/, I12)") "nombre total d'iterations" ,  nitTot ! en francais, utilise dans validation/comparaison.f90
+     write(Flog,"(A,/, I12)") "total number of iterations" ,  nitTot ! used in  validation/comparaison.f90
 
      write(OUTPUT_UNIT,"(/,A)")     "========================================== ("//trim(simu_name)//")"
      write(OUTPUT_UNIT,"(/,A)")     "Algorithm times"
@@ -1505,13 +1505,13 @@ end subroutine log_final_times
 !==============================================================================
 !      SUBROUTINE WRITE_CRIT_LOG
 !
-!>  ECRIURE DES CRITERES DANS LE FICHIER LOG
-!!      si la diffusion est active, on affiche les valeurs max pour chaque variable
-!!      sinon, on affiche 0
+!>  WRITE CRITERIA TO THE LOG FILE
+!!      if diffusion is active, display the max values for each variable
+!!      otherwise, display 0
 !!
-!!  crit : type(CRIT_BASE) variable de ce module (NL_base_mod.f90)
+!!  crit : type(CRIT_BASE) variable from this module (NL_base_mod.f90)
 !!
-!!  \param[in]    FU, unite logique (Flog ou OUTPUT_UNIT)
+!!  \param[in]    FU, logical unit (Flog ou OUTPUT_UNIT)
 !!
 !------------------------------------------------------------------------------
 subroutine write_crit_log(FU)
@@ -1521,11 +1521,11 @@ subroutine write_crit_log(FU)
    integer, intent(in)                  :: FU
 
    real(mytype)                         :: A,B,C,D
-   character(len=5),parameter           :: FMT_real="E15.8"             !<format d'ecriture d'un reel
-!   character(len=6),parameter          :: FMT_real="E25.18"            !<format d'ecriture d'un reel tres precis
+   character(len=5),parameter           :: FMT_real="E15.8"             !<real number output format
+!   character(len=6),parameter          :: FMT_real="E25.18"            !<very precise real number output format
 
 
-   !> Si la diffusion n'est pas activee, les criteres associes sont affiches a 0.
+!> If diffusion is not activated, the associated criteria are displayed as 0.
    if (algo_param%Diffusion) then   
       A = maxval(crit_b%eqD)
       B = maxval(crit_b%FluxDMoy)
@@ -1538,16 +1538,16 @@ subroutine write_crit_log(FU)
       D = 0.
    end if
 
-   !> ecriture
+   !> wrtie to file
    write(FU,"(A)")     "------------------------------------------ ("//trim(simu_name)//")"                               
    write(FU,"(2(A,"//FMT_real//"))") &
-                      "criteres d'equilibre                (meca,diff) :", crit_b%eq,' , ', A
+                      "equilibrium criteria                (meca,diff) :", crit_b%eq,' , ', A
    write(FU,"(2(A,"//FMT_real//"))") &
-                      "criteres sur la contrainte moyenne  (meca,diff) :", crit_b%SigMoy,' , ', B
+                      "mean stress criteria                (meca,diff) :", crit_b%SigMoy,' , ', B
    write(FU,"(2(A,"//FMT_real//"))") &
-                      "criteres de compatibilite           (meca,diff) :", crit_b%Cptb,' , ', C
+                      "compatibility criteria              (meca,diff) :", crit_b%Cptb,' , ', C
    write(FU,"(2(A,"//FMT_real//"))") &
-                      "criteres sur la deformation moyenne (meca,diff) :", crit_b%DefMoy,' , ', D
+                      "mean strain criteria                (meca,diff) :", crit_b%DefMoy,' , ', D
 
 end subroutine write_crit_log
 !==============================================================================

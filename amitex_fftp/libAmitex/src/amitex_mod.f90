@@ -542,7 +542,7 @@ else !***********************************************CAS LECTURE FICHIER
   end if
   open(newunit=Fcmd, file=trim(file_cmd),form="formatted", status="old", action="read",iostat= ios)
   if ( ios /= 0 ) then
-     write(err_msg,fmt="(3A,I0,A)") "Probleme a l'ouverture du fichier : ",trim(file_cmd),&
+     write(err_msg,fmt="(3A,I0,A)") "Problem opening file : ",trim(file_cmd),&
           " , ",ios," (lire_commande)"
      call amitex_abort(trim(err_msg),2,0) 
   end if
@@ -833,8 +833,8 @@ subroutine set_pRow_pCol(p_row,p_col,nx,ny,nz)
        !! determinees par l'algorithme
        !! --> decomposition 1D 
 
-       write(err_msg,fmt="(A,I0,A)") "Décomposition 2D de la cellule en ",n," processus incompatible &
-            &avec 2decomp --> decomposition 1D"
+       write(err_msg,fmt="(A,I0,A)") "2D decomposition of the cell into ",n," processes is incompatible &
+            &with 2decomp --> switching to 1D decomposition"
        call amitex_abort(err_msg,-1,0)
 
        if (p_col_max >= n) then
@@ -845,8 +845,8 @@ subroutine set_pRow_pCol(p_row,p_col,nx,ny,nz)
           p_col = 1
        else
           ! Decomposition 1D impossible 
-          write(err_msg,fmt="(A,I0)") "Decomposition 1D impossible, nombre de processus demande trop eleve :&
-                &nombre max possible = ", max(p_row_max,p_col_max)
+          write(err_msg,fmt="(A,I0)") "1D decomposition impossible, number of requested processes too high: &
+                &maximum possible = ", max(p_row_max,p_col_max)
           call amitex_abort(err_msg,2,0)        
        end if
     end if
@@ -1004,7 +1004,7 @@ subroutine init_log(fic_log0)
   if(nrank==0) then
      open(newunit=Flog, file=fic_log,form="formatted", status="replace", action="write",iostat= io_stat)  
      if ( io_stat /= 0 ) then
-        write(OUTPUT_UNIT,"(3A,I0)")" Probleme a l'ouverture (fichier: ",fic_log,") (amitex)",io_stat
+        write(OUTPUT_UNIT,"(3A,I0)")" Problem opening file (file: ",fic_log,") (amitex)",io_stat
      end if
   end if
 
