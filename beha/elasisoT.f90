@@ -1,18 +1,18 @@
 !=======================================================================
-!>           FONCTION ELASISO for Phase-Field
+!>           ELASISO FUNCTION for Phase-Field
 !!-----------------------------------------------------------------------
 !!
 !!-----------------------------------------------------------------------
 !!
-!! \param[in]  STRAN   (tableau reel(6)) tenseur des deformations
-!! \param[in]  DSTRAN  (tableau reel(6)) inccremenet tenseur des deformations
-!! \param[in]  PROPS   (tableau reel(2)) coefficients (lambda, mu)
+!! \param[in]  STRAN   (real array(6)) strain tensor
+!! \param[in]  DSTRAN  (real array(6)) strain tensor increment
+!! \param[in]  PROPS   (real array(2)) coefficients (lambda, mu)
 !!
-!! \param[inout]  STATEV (tableau reel(2)) damage and history fields
+!! \param[inout]  STATEV (real array(2)) damage and history fields
 !!
-!! \param[out] STRESS    (tableau reel(6)) tenseur des contraintes
+!! \param[out] STRESS    (real array(6)) stress tensor
 !!
-!! Notation CAST3M (Voigt, ordre 11 22 33 12 13 23)
+!! CAST3M notation (Voigt, ordre 11 22 33 12 13 23)
 !! NOTE: this subroutine requires another subroutine "rs" for computing the eigen*
 !=================================================================================
 SUBROUTINE elasisoT( STRESS, STATEV, DDSDDE, SSE, SPD, SCD,&
@@ -26,7 +26,7 @@ SUBROUTINE elasisoT( STRESS, STATEV, DDSDDE, SSE, SPD, SCD,&
 
   implicit none
 
-!     Arguments de l'interface umat
+  !     UMAT interface arguments
 !--------------------------------------------------------
       CHARACTER*16  CMNAME
 !
@@ -50,8 +50,13 @@ SUBROUTINE elasisoT( STRESS, STATEV, DDSDDE, SSE, SPD, SCD,&
 
   double precision,dimension(6)    :: Def
   double precision                 :: Def_sw
-  double precision                 :: Tr_Def,Mu2
+  double precision                 :: Tr_Def,Mu2, Lambda, Mu
   integer                          :: i
+
+  ! Material Properties
+  Lambda = PROPS(1)
+  Mu = PROPS(2)
+  Mu2 = 2._8 * Mu
 
   !get the current strain
   Def = STRAN+DSTRAN
@@ -63,13 +68,12 @@ SUBROUTINE elasisoT( STRESS, STATEV, DDSDDE, SSE, SPD, SCD,&
   Def(1:3) = Def(1:3) - STATEV
 
   !calculate stress 
-  Mu2 = 2._8 * PROPS(2)
   Tr_Def = Def(1) + Def(2) + Def(3)
   do i = 1,3
-     STRESS(i) = (PROPS(1)) * Tr_Def + Mu2 * Def(i)
+     STRESS(i) = Lambda * Tr_Def + Mu2 * Def(i)
   end do
   do i = 4,6
-     STRESS(i) = PROPS(2) * Def(i)
+     STRESS(i) = Mu * Def(i)
   end do
 
   !print *, 'TEMP:', TEMP+DTEMP, 'eps_th:', STATEV

@@ -4,43 +4,43 @@
 <!-- OUPUT QUANTITIES -->
 <Output>
     <vtk_StressStrain Strain="1" Stress="1"/>
-    <vtk_IntVarList numM="1"> Damage  </vtk_IntVarList>
-    <vtk_IntVarList numM="2">  </vtk_IntVarList>
+    <vtk_IntVarList numM="1"> 1 2 </vtk_IntVarList>
+    <vtk_IntVarList numM="2"> 1 2 </vtk_IntVarList>
 </Output>
 
 
-<!--initial values of temperature and external loads-->
+<!--initial values of temperature and external loads
 <InitLoadExt>
     <T Value="0"/>
 </InitLoadExt>
+-->
 
-<!-- SUCCESSIVE LOADINGS AND OUTPUT TIMES -->
+
+<!-- SUCCESSIVE LOADINGS AND OUTPUT TIMES 
 <Loading Tag="1">
     <Time_Discretization Discretization="Linear" Nincr="10" Tfinal="1.0" />
-    <Output_vtkList> 1 10 </Output_vtkList> 
-    <!--mechanical load-->
+    <Output_vtkList> 1  </Output_vtkList> 
     <xx Driving="Stress" Evolution="Constant"/>
     <yy Driving="Stress" Evolution="Constant"/>
     <zz Driving="Stress" Evolution="Constant"/>
     <xy Driving="Stress" Evolution="Constant"/>
     <xz Driving="Stress" Evolution="Constant"/>
     <yz Driving="Stress" Evolution="Constant"/>
-    <!--temperature-->
-    <T Evolution="Linear" Value="-100"/>
+    <T Evolution="Linear" Value="-1"/>
 </Loading>
+-->
 
-<Loading Tag="2">
-    <Time_Discretization Discretization="Linear" Nincr="200" Tfinal="200" />
+
+<Loading Tag="1">
+    <Time_Discretization Discretization="Linear" Nincr="200" Tfinal="1.0" />
     <Output_vtkList> 1 10 50 100 200</Output_vtkList> 
     <!--mechanical load-->
-    <xx Driving="Strain" Evolution="Linear" Value="0.5"/>
+    <xx Driving="Strain" Evolution="Linear" Value="0.1"/>
     <yy Driving="Stress" Evolution="Constant"/>
     <zz Driving="Stress" Evolution="Constant"/>
     <xy Driving="Stress" Evolution="Constant"/>
     <xz Driving="Stress" Evolution="Constant"/>
-    <yz Driving="Stress" Evolution="Constant"/>
-    <!--temperature-->
-    <T Evolution="Constant" Value="-100"/>
+    <yz Driving="Stress" Evolution="Constant"/>    
 </Loading>
 
 </Loading_Output>
