@@ -18,17 +18,20 @@ ALGO="algo/algo_Miehe2.xml"
 
 # Loop through all generated VTK files in the nested directory structure
 for vtk_file in micr/code_python/mesh/L*/h*/iUC*.vtk; do
-    # Extract spacing and volume fraction dirs
-    spacing_dir=$(basename "$(dirname "$vtk_file")")        # h0.0002
-    vf_dir=$(basename "$(dirname "$(dirname "$vtk_file")")") # L0.05_vf0.35
+    spacing_dir=$(basename "$(dirname "$vtk_file")")        # e.g. h0.0002
+    vf_dir=$(basename "$(dirname "$(dirname "$vtk_file")")") # e.g. L0.05_vf0.35
+    vtk_basename=$(basename "$vtk_file" .vtk)                 # e.g. iUC100_vpMIN0.09
 
-    resu_dir="resu/EXP/${vf_dir}/${spacing_dir}"
+    resu_dir="resu/EXP/${vf_dir}/${spacing_dir}/${vtk_basename}"
     mkdir -p "$resu_dir"
+
 
     echo "Running AMITEX for: $vtk_file"
     echo "Results in: $resu_dir"
 
-    $MPIRUNalias $AMITEX -nm "$vtk_file" -m "$MATE" -c "$LOAD" -a "$ALGO" -s "$resu_dir"
+    output_prefix="${resu_dir}/Load0.0"
+    $MPIRUNalias $AMITEX -nm "$vtk_file" -m "$MATE" -c "$LOAD" -a "$ALGO" -s "$output_prefix"
 done
+
 
 

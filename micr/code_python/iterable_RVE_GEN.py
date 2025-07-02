@@ -19,9 +19,9 @@ fibre_dist = FibreRadiusDistribution(
     seed=42,
 )
 
-volume_fractions = [0.35]
-n_geometries = 1
-porosity_targets = [0.05]
+volume_fractions = [0.35, 0.40, 0.45, 0.50, 0.55, 0.60]
+n_geometries = 6
+porosity_targets = [0.05, 0.10, 0.15, 0.20]
 
 n = 255
 domain_size = 50e-3
@@ -89,8 +89,8 @@ def write_vtk_structured_points(filename, alpha2d, spacing, pore_mask=None):
     volume2d = alpha2d.copy().astype(np.uint8)
     volume2d += pore_mask
     volume2d[volume2d == 2] = 0 #Map Fibre/Pore Overalp to Fibre
-    volume2d[volume2d == 1] = 2 # Map Matrix to 1 as expected by AMITEX
-    volume2d[volume2d == 0] = 1 # Map Fibre to 2 as expected by AMITEX
+    volume2d[volume2d == 1] = 2 # Map Matrix to 2 as expected by AMITEX
+    volume2d[volume2d == 0] = 1 # Map Fibre to 1 as expected by AMITEX
 
     volume = np.reshape(volume2d, (1, ny, nx)).astype(np.uint8)
 
@@ -107,6 +107,24 @@ def write_vtk_structured_points(filename, alpha2d, spacing, pore_mask=None):
         f.write(b"LOOKUP_TABLE default\n")
         f.write(volume.tobytes(order='C'))
 
+def write_vtk_mask(filename, alpha2d, pore_mask):
+    ny, nx = alpha2d.shape
+    mask2d = (~((alpha2d == 1) & (pore_mask == 2))).astype(np.uint8)  # 1 = simulate; 0 = pore
+
+    mask3d = np.reshape(mask2d, (1, ny, nx)).astype(np.uint8)
+
+    with open(filename, 'wb') as f:
+        f.write(b"# vtk DataFile Version 4.5\n")
+        f.write(b"Pore Mask for AMITEX\n")
+        f.write(b"BINARY\n")
+        f.write(b"DATASET STRUCTURED_POINTS\n")
+        f.write(f"DIMENSIONS {nx+1} {ny+1} 2\n".encode())
+        f.write(b"ORIGIN 0.000 0.000 0.000\n")
+        f.write(f"SPACING {spacing:.6e} {spacing:.6e} {spacing:.6e}\n".encode())
+        f.write(f"CELL_DATA {(nx)*(ny)}\n".encode())
+        f.write(b"SCALARS mask unsigned_char\n")
+        f.write(b"LOOKUP_TABLE default\n")
+        f.write(mask3d.tobytes(order='C'))
 
 # ------------------------------ MAIN LOOP ------------------------------- #
 for vf in volume_fractions:
@@ -161,6 +179,10 @@ for vf in volume_fractions:
             
             filename = os.path.join(subdir, f"iUC{i + 1}_vpMIN{target_porosity}.vtk")
             write_vtk_structured_points(filename, alpha_bin, spacing, pore_mask)
-
             print(f"Saved: {filename}")
-    
+            
+
+            #mask_filename = os.path.join(subdir, f"iUC{i + 1}_vpMIN{target_porosity}_mask.vtk")
+            #write_vtk_mask(mask_filename, alpha_bin, pore_mask)
+            #print(f"Saved mask: {mask_filename}")
+
