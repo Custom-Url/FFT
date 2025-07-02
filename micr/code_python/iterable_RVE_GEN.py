@@ -88,8 +88,9 @@ def write_vtk_structured_points(filename, alpha2d, spacing, pore_mask=None):
 
     volume2d = alpha2d.copy().astype(np.uint8)
     volume2d += pore_mask
-    volume2d[volume2d == 2] = 0
-    volume2d[volume2d == 3] = 2
+    volume2d[volume2d == 2] = 0 #Map Fibre/Pore Overalp to Fibre
+    volume2d[volume2d == 1] = 2 # Map Matrix to 1 as expected by AMITEX
+    volume2d[volume2d == 0] = 1 # Map Fibre to 2 as expected by AMITEX
 
     volume = np.reshape(volume2d, (1, ny, nx)).astype(np.uint8)
 

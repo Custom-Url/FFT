@@ -54,4 +54,19 @@
     <IntVar Index="2" Type="Constant" Value="0."/> <!-- history field psiP -->
 </Material>
 
+<!-- MATERIAL 3: PORE (Void) -->
+<Material numM="3" Lib="beha/libUmatAmitex.so" Law="elasisoPF">
+    <Coeff Index="1" Type="Constant" Value="1e-9"/> <!-- lambda [MPa] -->
+    <Coeff Index="2" Type="Constant" Value="1e-9"/> <!-- mu [MPa] -->
+    <Coeff Index="3" Type="Constant" Value="0.0"/> <!-- CTE -->
+
+    <Coeff Index="4" Type="Constant" Value="0.0"/> <!-- visc -->
+    <Coeff Index="5" Type="Constant" Value="0.3e-3"/> <!-- lc -->
+    <Coeff Index="6" Type="Constant" Value="0.3e-3"/> <!-- gc -->
+
+    <!-- Internal variables -->
+    <IntVar Index="1" Type="Constant" Value="0."/> <!-- damage d -->
+    <IntVar Index="2" Type="Constant" Value="0."/> <!-- history field psiP -->
+</Material>
+
 </Materials>

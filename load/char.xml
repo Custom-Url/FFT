@@ -35,7 +35,7 @@
     <Time_Discretization Discretization="Linear" Nincr="100" Tfinal="1.0" />
     <Output_vtkList> 1 50 75 100  </Output_vtkList> 
     <!--mechanical load-->
-    <xx Driving="Strain" Evolution="Linear" Value="0.01"/>
+    <xx Driving="Strain" Evolution="Linear" Value="0.02"/>
     <yy Driving="Stress" Evolution="Constant"/>
     <zz Driving="Stress" Evolution="Constant"/>
     <xy Driving="Stress" Evolution="Constant"/>

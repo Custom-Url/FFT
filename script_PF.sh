@@ -17,7 +17,7 @@ LOAD="load/char.xml"
 ALGO="algo/algo_Miehe2.xml"
 
 # Loop through all generated VTK files in the nested directory structure
-for vtk_file in micr/code_python/mesh/L*/h*/iUC_*.vtk; do
+for vtk_file in micr/code_python/mesh/L*/h*/iUC*.vtk; do
     # Extract spacing and volume fraction dirs
     spacing_dir=$(basename "$(dirname "$vtk_file")")        # h0.0002
     vf_dir=$(basename "$(dirname "$(dirname "$vtk_file")")") # L0.05_vf0.35
