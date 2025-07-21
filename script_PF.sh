@@ -18,6 +18,8 @@ ALGO="algo/algo_Miehe2.xml"
 
 # Loop through all generated VTK files in the nested directory structure
 for vtk_file in micr/code_python/mesh/L*/h*/iUC*.vtk; do
+# for vtk_file in micr/code_python/mesh/L0.05_vf0.35/h0.0002/iUC*.vtk; do
+	
     spacing_dir=$(basename "$(dirname "$vtk_file")")        # e.g. h0.0002
     vf_dir=$(basename "$(dirname "$(dirname "$vtk_file")")") # e.g. L0.05_vf0.35
     vtk_basename=$(basename "$vtk_file" .vtk)                 # e.g. iUC100_vpMIN0.09

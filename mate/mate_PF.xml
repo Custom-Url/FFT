@@ -56,9 +56,9 @@
 
 <!-- MATERIAL 3: PORE (Void) -->
 <Material numM="3" Lib="beha/libUmatAmitex.so" Law="elasisoPF">
-    <Coeff Index="1" Type="Constant" Value="1e-3"/> <!-- lambda [MPa] -->
-    <Coeff Index="2" Type="Constant" Value="1e-3"/> <!-- mu [MPa] -->
-    <Coeff Index="3" Type="Constant" Value="1e-9"/> <!-- CTE -->
+    <Coeff Index="1" Type="Constant" Value="0"/> <!-- lambda [MPa] -->
+    <Coeff Index="2" Type="Constant" Value="0"/> <!-- mu [MPa] -->
+    <Coeff Index="3" Type="Constant" Value="0"/> <!-- CTE -->
 
     <Coeff Index="4" Type="Constant" Value="0.0"/> <!-- visc -->
     <Coeff Index="5" Type="Constant" Value="75e-6"/> <!-- lc -->

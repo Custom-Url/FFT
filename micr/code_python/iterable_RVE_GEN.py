@@ -19,9 +19,9 @@ fibre_dist = FibreRadiusDistribution(
     seed=42,
 )
 
-volume_fractions = [0.35, 0.40, 0.45, 0.50, 0.55, 0.60]
-n_geometries = 6
-porosity_targets = [0.05, 0.10, 0.15, 0.20]
+volume_fractions = [0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60]
+n_geometries = 200
+porosity_targets = [0.03, 0.06, 0.09, 0.12, 0.15, 0.18]
 
 n = 255
 domain_size = 50e-3

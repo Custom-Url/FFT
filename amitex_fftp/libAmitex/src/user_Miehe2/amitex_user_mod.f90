@@ -59,12 +59,13 @@ module amitex_user_mod
 ! Declare global user-variables as public
   public :: damageVar, AA, BB, tau, tau0, HH, ACT3_Rdamage, ACT3_Udamage, NdamageVar
   public :: tauF, FreqLaplacian
+  public :: dgStressVar ! Global stress variable used for aborting simulation after final fracture
 
 ! Declare global procedures as public (used in resolution_user_mod or standard_user_mod)
   public :: initDamageHH,resolPF_visc,getHistoryTerm_visc,updateHistory, apply_GreenPF_visc
   public :: updateIntVar, initFreqLaplacian_YC
   public :: rs,tred1,tred2,tqlrat,tql2,pythag 
-
+ 
 
 !!------------------------------------------------------------------------------
 !>                                                                 PUBLIC FIELDS 
