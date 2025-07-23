@@ -16,5 +16,8 @@
          <P_string Index="1" Value="true"/>                 <!-- Convergence Acceleration for solving Damage field -->
     </User>
 
+    <User_functions_mod Value="true"/>		     	    <!-- custom interrupt criterion for average stress  -->
+
+
 </Algorithm_Parameters>
 

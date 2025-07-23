@@ -48,6 +48,11 @@ module standard_user_mod
   private 
   public :: before_unpas_user, after_unpas_user
 
+  !! variables for implementing early stopping at final fracture (hopefully)
+  real(mytype) :: peakStress = 0._mytype
+  real(mytype), parameter :: peakStressThreshold = 1.0e8_mytype  ! <-- Currently set as a threshold for testing before adding logic
+  logical :: force_final_vtk = .false.
+
 contains
 
 !===========================================================================================================
@@ -102,8 +107,6 @@ subroutine before_unpas_user(load_n,load_incr, ind_tps)
 !!----------------------------------------
 
 end subroutine before_unpas_user
-
-
 !===========================================================================================================
 !!==========================================================================================================
 !> after_unpas_user : write what must be done just AFTER unpas (using the standard algorithm)
@@ -177,9 +180,6 @@ subroutine after_unpas_user(load_n,load_incr,ind_tps)
   end if
 
 end subroutine after_unpas_user
-
-
-
 !===================================================================================================
 !>       SUBROUTINE D'AFFECTATION DES FREQUENCES
 !!

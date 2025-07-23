@@ -66,24 +66,53 @@ contains
 !!
 !! local_load%t_load(-2:0):                            (-2,-1,0) respectively previous, begin and  end times
 !===========================================================================================================
-subroutine user_load_interruption_average(test_out,alpha,load_n,sigMoy0,sigMoy,defMoy0,defMoy,&
-                                          local_load_0,local_load_1,local_load_t, user_param)
+subroutine user_load_interruption_average(test_out, alpha, load_n, sigMoy0, sigMoy, defMoy0, defMoy, &
+                                          local_load_0, local_load_1, local_load_t, user_param)
   implicit none
-  real(kind=REAL64),dimension(:), intent(in) :: sigMoy0, sigMoy, defMoy0, defMoy
-  real(kind=REAL64),dimension(:), intent(in) :: local_load_0, local_load_1, local_load_t
-  integer,intent(in)                         :: load_n
-  real(kind=REAL64),intent(out)              :: alpha 
-  logical, intent(out)                       :: test_out
-  real(kind=REAL64),dimension(:),intent(in)  :: user_param
+  real(kind=REAL64), dimension(:), intent(in) :: sigMoy0, sigMoy, defMoy0, defMoy
+  real(kind=REAL64), dimension(:), intent(in) :: local_load_0, local_load_1, local_load_t
+  integer, intent(in) :: load_n
+  real(kind=REAL64), intent(out) :: alpha
+  logical, intent(out) :: test_out
+  real(kind=REAL64), dimension(:), intent(in) :: user_param
 
-  alpha = load_n + sigMoy0(1) + sigMoy(1) + defMoy0(1) + defMoy(1) + size(user_param) &! trick to avoid gcc-warning (unused arg)
-          + local_load_0(1) + local_load_1(1)+ local_load_t(1)
-  alpha = 1.
+  real(kind=REAL64), save :: sigMoy_prev = -1.d99
+  real(kind=REAL64), save :: sigMoy_peak = -1.d99
+  logical, save :: dropped_below_50pct = .false.
+  logical, save :: interrupted = .false.
+  logical, save :: waiting_for_rise = .false.
 
-  test_out =.false.
+  test_out = .false.
+  alpha = 1.d0
+
+  ! Update peak if current stress is higher
+  if (sigMoy(1) > sigMoy_peak) then
+     sigMoy_peak = sigMoy(1)
+  end if
+
+  ! Check if stress dropped below 50% of peak for the first time
+  if (.not. dropped_below_50pct) then
+    if (sigMoy(1) <= 0.5d0 * sigMoy_peak) then
+      dropped_below_50pct = .true.
+      waiting_for_rise = .true.
+      print *, 'Stress dropped below 50% of peak at load', load_n
+    end if
+  end if
+
+  ! After dropping below 50%, wait for stress to start rising again (local min)
+  if (dropped_below_50pct .and. waiting_for_rise .and. .not. interrupted) then
+    if (sigMoy(1) > sigMoy_prev) then
+      ! Stress started rising again => local minimum reached
+      test_out = .true.
+      alpha = 0.d0
+      interrupted = .true.
+      print *, 'Interrupting at local minimum after stress dropped below 50% peak at load', load_n
+    end if
+  end if
+
+  sigMoy_prev = sigMoy(1)
 
 end subroutine user_load_interruption_average
-
 !===========================================================================================================
 !> user_load_interruption_internal_variables : LOAD INTERRUPTION ON INTERNAL VARIABLES
 !!
